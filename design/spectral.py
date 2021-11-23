@@ -18,7 +18,7 @@ class Spectral:
             self.u = solution(np.linspace(-.5,.5, Nx)).reshape(-1, 1) * np.ones([1, Ny])
         elif initialization == 'trivial_y':
             solution = lambda y: np.tanh(y/(np.sqrt(2)*eps))
-            self.u = np.ones([Nx, 1]) * solution(np.linspace(-.5,.5, Ny)).reshape(-1, 1)
+            self.u = solution(np.linspace(-.5,.5, Ny)).reshape(1, -1) * np.ones([Nx, 1])
         elif initialization == 'separated_x':
             self.u = np.concatenate((np.ones([(Nx+1)//2, Ny]), -np.ones([Nx//2, Ny])))
         elif initialization == 'separated_y':
