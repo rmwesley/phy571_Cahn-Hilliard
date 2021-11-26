@@ -1,0 +1,19 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{bigints}
+\begin{document}
+1. Conservation of the total relative concentration $\Phi$ (Our order parameter)
+
+Just like the total number of particles, $\Phi$ is conserved.
+To demonstrate so, we start by reminding ourselves that $\phi(\mathbf{x},t) = c_A(\mathbf{x},t)-c_B(\mathbf{x},t)$.
+Whence \[ \Phi(t) = \int_{\Omega} \phi(\mathbf{x},t)d\mathbf{x} = N_A - N_B, \]
+where $\Omega$ is the available space.
+
+$\Phi$ is thus conserved, since $N_A$ and $N_B$ also are over time.
+
+Finally, we define as an error metric the proportional change in this quantity.
+Numerically, we just calculate the sum of the relative concentration over the whole spatial grid.
+We define
+\[ \epsilon(t) = log_{10}(\frac{\Phi(t)}{\Phi_0}-1) \]
+We take the logarithm since the scales are very small $(\epsilon(t)<-14)$.
+\end{document}
