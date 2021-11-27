@@ -5,3 +5,6 @@ animation.gif
 temp*
 .ipynb_checkpoints
 *.pyc
+*.aux
+*.log
+*.pdf
