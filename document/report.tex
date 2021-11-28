@@ -16,4 +16,9 @@ Numerically, we just calculate the sum of the relative concentration over the wh
 We define
 \[ \epsilon(t) = log_{10}(\frac{\Phi(t)}{\Phi_0}-1) \]
 We take the logarithm since the scales are very small $(\epsilon(t)<-14)$.
+%The second-order term is dependent on the squared 2-norm of the gradient of the concentration.
+%That is, it accounts for the increment in the free energy due to the heterogeneity in the system (Higher variation in composition, higher concentration gradient).
+%For a high epsilon value, to minimize the Helmholtz free energy, we must make the second order term smaller overall (tendence towards zero).
+%This gives rise to a weaker phase separation and thus results in a more homogeneous, miscible, monophasic fluid
+%In our simple model, this term accounts for the spinodal decomposition we observe in fluids.
 \end{document}

@@ -2,20 +2,16 @@ import numpy as np
 
 class Spectral:
     """Spectral stepping method for solving the Cahn-Hilliard equation"""
-    """The class provides some built-in stepping methods to evolve the system in time. Default is step_method5."""
-    def step_method5(self, u_hat, dt):
-        """Spectral version of linearly stabilized splitting scheme"""
-        return ((u_hat +
-            dt * self.k2 * (np.fft.fft2(self.u**3)) -
-            3*dt * self.k2 * u_hat ) /
-            (1 + dt * (self.eps**2 * self.k2**2 - 2*self.k2)))
+    """The class provides some built-in stepping methods to evolve the problem in time. Default is step_method5."""
 
-    def __init__(self, Lx, Ly, Nx, Ny, eps, initialization='random', step=step_method5):
+    def __init__(self, Lx, Ly, Nx, Ny, eps, initialization='random', step=None):
         """Initialize the spatial and spectral grids based on passed arguments. Initializes the desired stepping function as well."""
         self.Lx, self.Ly = Lx, Ly
         self.Nx, self.Ny = Nx, Ny
         self.x, self.dx = np.linspace(0, Lx, Nx, retstep=True)
         self.y, self.dy = np.linspace(0, Ly, Ny, retstep=True)
+        #self.kx = np.linspace(0, (Nx-1)/Lx, Nx).reshape(-1, 1)
+        #self.ky = np.linspace(0, (Ny-1)/Ly, Ny).reshape(1, -1)
         self.kx = 2 * np.pi * np.fft.fftfreq(Nx, d=self.dx).reshape(-1, 1)
         self.ky = 2 * np.pi * np.fft.fftfreq(Ny, d=self.dy).reshape(1, -1)
 
@@ -37,24 +33,35 @@ class Spectral:
         else:
             self.u = np.random.uniform(-1, 1, [Nx, Ny])
 
-        """The homogeneous free energy per molecule function."""
+        """The homogeneous free energy per molecule."""
+        """This function isn't the total density of free energy! It can be though of as its first-order term, though."""
         self.func = lambda t: t**3 - t
-        """This function isn't the total density of free energy! It can be though of as only its first-order term. The second-order term is dependent on the squared 2-norm of the gradient of the concentration, that is, this one accounts for the increment in the free energy due to the variation of the concentration or heterogeneity in the system (Higher variation, higher concentration gradient). For a high epsilon value, to minimize the Hemholtz free energy we must make the second order term smaller overall (tendence towards zero). This gives rise to a weaker phase separation and thus results in a more homogeneous, miscible, monophasic fluid"""
-    #TODO
-    #Call step methods "recursion", "recursive_step", "step", "evolution" ...?
         self.step = step 
+        if step==None: self.step = self.step_method5
         self.eps = eps
-    
-    def advance(self, dt, Nt):
-        u_hat = np.fft.fft2(self.u)
+
+    def advance(self, u_hat, Nt):
+        """Advance a spectral grid temporally. Does not update any os the object's attributes."""
         for i in range(Nt):
             u_hat = self.step(u_hat, dt)
-        self.u = np.fft.ifft2(u_hat).real
+
+    def evolve(self, reps, dt, Nt):
+        """Evolves the system temporally, updating self.u 'reps' times."""
+        """To calculate the updated value, we evolve the wavelength spectral decomposition (Fourier transform) of self.u with the advance procedure. We then go back to the space domain through an inverse Fourier transform."""
+        for i in range(reps):
+            u_hat = np.fft.fft2(self.u)
+            for i in range(Nt):
+                u_hat = self.step(u_hat, dt)
+            self.u = np.fft.ifft2(u_hat).real
     
     def step_method2(self, u_hat, dt):
         """Spectral version of semi-implicit Euler's scheme"""
         return ((u_hat -
             dt * self.k2 * np.fft.fft2(self.func(self.u))) /
             (1 + dt * self.eps**2 * self.k2**2))
-        #u_hat = ((u_hat - dt * self.k2 * np.fft.fft2(func(self.u))) /
-        #    (1 + 2*dt*self.k2  + dt * self.eps**2 * self.k2**2))
+    def step_method5(self, u_hat, dt):
+        """Spectral version of linearly stabilized splitting scheme"""
+        return ((u_hat -
+            dt * self.k2 * (np.fft.fft2(self.u**3)) +
+            3*dt * self.k2 * u_hat ) /
+            (1 + dt * (self.eps**2 * self.k2**2 + 2*self.k2)))
