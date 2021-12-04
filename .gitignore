@@ -1,7 +1,5 @@
 __pycache__/
 readme.pdf
-documentation/
-animation.gif
 temp*
 .ipynb_checkpoints
 *.pyc

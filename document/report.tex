@@ -9,16 +9,31 @@ To demonstrate so, we start by reminding ourselves that $\phi(\mathbf{x},t) = c_
 Whence \[ \Phi(t) = \int_{\Omega} \phi(\mathbf{x},t)d\mathbf{x} = N_A - N_B, \]
 where $\Omega$ is the available space.
 
-$\Phi$ is thus conserved, since $N_A$ and $N_B$ also are over time.
+$\Phi$ is thus conserved over time, since $N_A$ and $N_B$ also are.
+As a side-note: \[ N = N_A + N_B = \int_{\Omega} d\mathbf{x} = \mu(\Omega), \]
+which is the measure of the area of $\Omega$, which has 0 error for a fixed-size grid.
 
-Finally, we define as an error metric the proportional change in this quantity.
+Since $2N_A = \Phi+1$, $\Phi$ is conserved if and only if $N_A$ and $N_B$ also are.
+
+Finally, we define as an error metric the change in this quantity.
 Numerically, we just calculate the sum of the relative concentration over the whole spatial grid.
 We define
-\[ \epsilon(t) = log_{10}(\frac{\Phi(t)}{\Phi_0}-1) \]
-We take the logarithm since the scales are very small $(\epsilon(t)<-14)$.
-%The second-order term is dependent on the squared 2-norm of the gradient of the concentration.
-%That is, it accounts for the increment in the free energy due to the heterogeneity in the system (Higher variation in composition, higher concentration gradient).
-%For a high epsilon value, to minimize the Helmholtz free energy, we must make the second order term smaller overall (tendence towards zero).
-%This gives rise to a weaker phase separation and thus results in a more homogeneous, miscible, monophasic fluid
-%In our simple model, this term accounts for the spinodal decomposition we observe in fluids.
+\[ \mathcal{E}(t) = |\Phi(t) - \Phi_0| \]
+We take the logarithm since the scales are very small and note that for our tests $log_{2}\mathcal{E}(t) \approx -58$.
+Which is on the order of the precision of the \verb`float64` type we used ($2^{-53}$).
+
+About the function $f(\phi) = F(\phi) + \frac{\epsilon^2}{2}|\nabla{\phi}|^2$ (density of free energy):
+
+The second term on $\phi$ describes the "gradient energy", or how the variability in the concentration locally increases the free energy.
+So as to decrease the free energy, the system normally increases the entropy through mixing, this is accounted for in the first term.
+But this second term is responsible for local regularity - locally, it favors regions of less variant concentration.
+That is, it accounts for the decrease in the free energy due to the homogeneity in the system's composition.
+(Higher homogeneity = Smaller local variation in composition = Smaller magnitude of concentration gradient = lower free energy).
+
+In our simple model, this term accounts for the spinodal decomposition we observe in fluids.
+For higher $\epsilon$ values, to minimize the Helmholtz free energy, we must make the gradient smaller overall, creating less but larger "islands of constancy" pure in each phase.
+This can also be seen as less "regions of transition" between the 2 main phases.
+So, $\epsilon$ can be seen as a term responsible for overall homogeneiry, which causes a tendency towards a smaller total surface of variation between the 2 phases.
+So after long time steps we would expect spherical boundaries between the 2 main phases to form.
+For relatively high $\epsilon$ this gives rise to very weak phase separation and thus results in a homogenous, miscible, monophasic fluid.
 \end{document}
