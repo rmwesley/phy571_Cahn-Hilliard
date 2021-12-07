@@ -2,7 +2,8 @@
 [//]: # (To compile this file as a pdf run the following command:
 pandoc readme.md -o readme.pdf)
 
-# Phase separation of the components of a binary fluid (AC)
+# Project desciption
+Subject: Phase separation of the components of a binary fluid (AC)
 
 Instructions/advices:
 
@@ -20,7 +21,21 @@ you may write naively.
 > TCGPhysica1995.pdf will possibly give you some ideas of diagnostics
 that you can implement, once your solver will be running, to
 characterize the patterns obtained in phase separation.
+\
 
-Run `pandoc readme.md -o readme.pdf` to compile this markdown file as a pdf
+## Compiling report.tex 
+
+To compile the LaTeX report in `document/` just run the command `pdflatex`&nbsp;`report.tex` from the `document/` directory.
+As for dependencies, installing the package `texlive-latex-extra` should be enough.
+
+Remember, for the `pdflatex` command the order of the options matters.
+If you want to set an output directory, the `-output-directory` option should come *before* the name of the `.tex` file to be compiled.
+This way you can compile the report directly from the root directory of the project into `document/`.
+
+`pdflatex -output-directory document document/report.tex`
+
+`-halt-on-error` is also a good option to avoid unnecessary error prompts. 
+\
+\
 
 **Project done in collaboration by students Rayen Mahjoub, Gaspard Daumas and Wesley Rodrigues Machado. Supervised by professor Arnaud Couairon.**

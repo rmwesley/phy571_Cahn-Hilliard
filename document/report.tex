@@ -1,7 +1,21 @@
-\documentclass{article}
+\documentclass[a4paper]{article}
 \usepackage{amsmath}
 \usepackage{bigints}
 \begin{document}
+
+\title{Report}
+\author{Wesley \textsc{Rodrigues Machado}}
+
+
+\tableofcontents
+\pagebreak
+
+
+\section{Code}
+Code documentation
+
+\section{Numerical analysis}
+
 1. Conservation of the total relative concentration $\Phi$ (Our order parameter)
 
 Just like the total number of particles, $\Phi$ is conserved.
@@ -22,18 +36,20 @@ We define
 We take the logarithm since the scales are very small and note that for our tests $log_{2}\mathcal{E}(t) \approx -58$.
 Which is on the order of the precision of the \verb`float64` type we used ($2^{-53}$).
 
+
+
+\section{Understanding the free energy density}
 About the function $f(\phi) = F(\phi) + \frac{\epsilon^2}{2}|\nabla{\phi}|^2$ (density of free energy):
 
-The second term on $\phi$ describes the "gradient energy", or how the variability in the concentration locally increases the free energy.
-So as to decrease the free energy, the system normally increases the entropy through mixing, this is accounted for in the first term.
-But this second term is responsible for local regularity - locally, it favors regions of less variant concentration.
-That is, it accounts for the decrease in the free energy due to the homogeneity in the system's composition.
+The second term on $\phi$ describes the "gradient energy", or how the local variability in the concentration increases the free energy.
+So as to decrease the free energy, the system normally increases the entropy through mixing, this is accounted for in the first term $F(\phi)$.
+But the second term is responsible for local regularity - locally, it favors regions of less variant concentration.
+That is, it accounts for the decrease in the free energy due to the homogeneity in the system's composition, modelling spinodal decomposition in a simple way.
 (Higher homogeneity = Smaller local variation in composition = Smaller magnitude of concentration gradient = lower free energy).
 
-In our simple model, this term accounts for the spinodal decomposition we observe in fluids.
-For higher $\epsilon$ values, to minimize the Helmholtz free energy, we must make the gradient smaller overall, creating less but larger "islands of constancy" pure in each phase.
-This can also be seen as less "regions of transition" between the 2 main phases.
-So, $\epsilon$ can be seen as a term responsible for overall homogeneiry, which causes a tendency towards a smaller total surface of variation between the 2 phases.
-So after long time steps we would expect spherical boundaries between the 2 main phases to form.
-For relatively high $\epsilon$ this gives rise to very weak phase separation and thus results in a homogenous, miscible, monophasic fluid.
+So $\epsilon$ could be visualized as being responsible for overall homogeneity.
+For higher $\epsilon$ values, to minimize the Helmholtz free energy, the system tends to make the gradient smaller overall, creating less but larger "islands of constancy" pure in each phase.
+This can also be seen as less "transition regions" or "total surface of variation" between the 2 main phases.
+So after long time steps we would expect spherical/circular boundaries between the 2 main phases to form (minimizing transition surface).
+Relatively high $\epsilon$ give rise to very weak phase separation, resulting in a homogenous, miscible, monophasic fluid.
 \end{document}
