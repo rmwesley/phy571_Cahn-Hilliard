@@ -5,13 +5,59 @@
 
 \title{Report on Numerical Physics' project
 
-\bf{Phase separation of a binary fluid}
+\bf{Phase separation of a binary fluid}  
 }
 \maketitle
 \pagebreak
 
 \tableofcontents
 \pagebreak
+
+\section{The Cahn-Hilliard equation}
+The Cahn-Hilliard equation is a non linear fourth order differential equation which is useful in solving problems such as the phase separation of a binary liquid mixture, tumor growth, the thermal induced phase separation etc. In our attempt to model the phase separation of the components of a binary fluid, the aim is to solve for a concentration variable $c(\mathbf{x}, t)$ that describes the spatial distribution of the two phases. A main advantage of solving the Cahn-Hilliard equation is that the border between the phases is continuous and does not have to be defined precisely.
+
+We will here give hints on how to derive the C-H equation from the laws of thermodynamics.
+
+First we consider a system of a mole of a binary solid system of molecules A and B, and we calculate its Helmholtz free energy density $F=E-TS$.
+
+We define c as the proportion of B-type molecules : $c=N_B/(N_A+N_B)$
+
+The mixing of the particules from both phases creates a difference in entropy $\Delta S=kln\frac{W}{W_0}$, where $W$ is the number of ways to order $N_A$ molecules of type A and $N_B$ of type B once they have been mixed together. Basic calculations lead to $\Delta S=-R[(1-c)ln(1-c)+c  ln c]$, where R is the universal gas constant.\\
+
+To derive the internal energy change $\Delta E$ due to mixing, we now consider the energies of the different types of bonds (A-A, B-B A-B). 
+We have: $E=P_{AA}\epsilon_{AA}+P_{AB}\epsilon_{AB}+P_{BB}\epsilon_{BB}$, with $P_{ij}$ the number of ij bonds and $\epsilon_{ij}$ the energy of the bond. Making the hypothesis that every molecule has $z$ neighbors, we conclude that $N_Az=P_{AB}+2P_{AA}$, and a similar equation for B.
+
+We finally have to find $P_{AB}$. To do so, an argument is that there are $N_az/2$ bonds (Avogadros number) in one mole of the solid, and that each bond has a probability $2c(1-c)$ of being an AB bond (each site is occupied by A (B) with probability 1-c (c)), so that the number of bonds AB is finally $N_azc(1-c)$. All in all, the inernal energy due to the mixing is $\Delta E=\Omega c(1-c)$ (where we don't consider the terms not depending on c), with $\Omega$ a constant, here equal to $zN_a(\epsilon_{AB}-0.5(\epsilon_{AA}+\epsilon_{BB}))$, which can be positive or negative.\\
+
+In the end, the molar Helmholtz free energy reads: $\Delta F=\Omega c(1-c)+RT[(1-c)ln(1-c)+c  ln c]$
+This function can be plotted for different temperatures:
+\begin{figure}[h!]
+\includegraphics[scale=0.7]{Capture}
+\caption{Molecular free energy as a function of c for different Temperatures}
+\end{figure}
+
+What we notice is that as long as T is greater than $T_{lim}$, the long terme solution to the problem will be homogeneous with concentration 0.5 everywhere, as this configuration will lower the energy of the system. But something more interesting happens when we lower the temperature: the homogeneous solution sponteanously evolves towards a binary fluid with two phases of different c.\\
+
+The next step is to compute the total free energy of the volume of non-uniform concentration: $e(c)=N_V\int_{\Omega}f d\mathbf{x}$ with $N_V$ the density of molecules and $f(c,\nabla c, \nabla^2 c,...)$ the free energy of a non uniform area. Some considerations of Taylor expansions, symmetry, border conditions and calculus lead to the result: $e(c)=\int_{\Omega}[F(c)+\frac{\epsilon^2}{2}|\nabla c|^2]d\mathbf{x}$
+
+To conclude, we introduce the chemical potential $\mu=\frac{\delta e}{\delta c}$. The net flux of components B $I=-M\nabla \mu$ satisfies the continuity equation $\frac{\partial c}{\partial t}=-\nabla I$, and finally gives us the Cahn-Hilliard equation: $$\frac{\partial c}{\partial t}=\Delta(F'(c)-\epsilon^2\Delta c)$$\\
+
+
+As solving the CH equation explicitly is not possible, numerical simulations are essential to understand long term behaviours of the solutions of the equation. Several methods are possible to solve this equation, we will here focus on spectral methods. 
+
+The first thing we will do is to discretize the time in time steps of $dt$. 
+
+We will now consider the C-H equation:$\frac{\partial \phi}{\partial t}=\Delta(F'(\phi)-\epsilon^2\Delta \phi)$, with $F(\phi)=0.25(\phi^2-1)^2$. Several schemes are possible to recursively solve for $\phi(kdt)$.\\
+
+\textbf{Semi implicit Euler scheme}(Scheme 2)
+The fourth order term will be treated implicitly and the others explicitly. Taking the Fourier transform of the equation and applying this scheme gives: 
+
+$$(1+dt\epsilon^2|\textbf{k}|^4)\tilde{\phi}^{n+1}(\textbf{k})=\tilde{\phi}^n(\textbf{k})-dt\textbf{k}^2\tilde{F'(\phi^n)}(\textbf{k})$$
+
+\textbf{Linearly stabilized splitting scheme}(Scheme 5)
+In this scheme the $-\phi$ in F' is split in $-3\phi$ that are treated explicitly and $2\phi$ that are treated implicitly. The rest doesn't differ from the semi implicit scheme. This gives:
+$$(1+dt(\epsilon^2|\textbf{k}|^4-2\textbf{k}^2))\tilde{\phi}^{n+1}(\textbf{k})=\tilde{\phi}^n(\textbf{k})+dt(\textbf{k}^2\tilde{{\phi^n}}(\textbf{k})^3-3\textbf{k}^2\tilde{\phi^n}(\textbf{k}))$$
+
 
 
 \section{Spectral solver}
