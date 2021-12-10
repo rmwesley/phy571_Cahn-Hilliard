@@ -3,28 +3,111 @@
 \usepackage{bigints}
 \begin{document}
 
-\title{Report}
-\author{Wesley \textsc{Rodrigues Machado}}
+\title{Report on Numerical Physics' project
 
+\bf{Phase separation of a binary fluid}
+}
+\maketitle
+\pagebreak
 
 \tableofcontents
 \pagebreak
 
 
-\section{Code}
-Code documentation
+\section{Spectral solver}
+This section details the code {\bf implementation}.
+For its actual documentation use the \verb`help()` method in a Python interpreter. 
+\verb`help()` is designed to be used interactively and has a simple usage.
+In Jupyter pressing \verb`Shift+Tab` shows a popup with the head of the documentation.
+You can also directly read the docstrings and comments in the code itself.
+
+%TODO: Decide the best between these words lol
+%The design/layout/structure/template/organization of the code is simple.
+The design of the code is very simple.
+A class representing the problem is implemented (\verb`FFTspectral` or \verb`DCTspectral`),
+with attributes, or fields, storing the problem's information \verb`(Lx, Nx, epsilon)`.
+None of the attributes are left constant, so everything can be played with mid-run.
+This obviously may cause bugs, but the freedom of intervention was preferred in our implementation.
+One obvious field that is meant to be updated on-the-fly,
+not left static as initial conditions,
+is the one representing our desired order parameter $\phi$,
+a function of space,
+which we aim to determine over time.
+It is stored in the field \verb`u` of the object.
+The \verb`t` field is used to store and keep track of the elapsed time since the object's initialization.
+In the end we can see the data on
+$\phi(\mathcal{x}, t)$
+and
+$\hat{\phi(\mathcal{k}, t)}$
+as a snapshot on a given instant in time containing only their spatial/spectral dependency.
+The data object can be evolved in time with methods detailed further on in this section.
+
+In the initialization we also create two arrays with a discretized representation of the two axis of the space.
+We call it the spatial grid, with \verb`Nx, Ny` equally spaced values in each axis.
+The same values \verb`Nx, Ny` are used in its dual, the spectral domain.
+The numerical representation of the spectral domain is detailed later.
+Instead of leaving these representations as actual grids we separated them in their two component axes, \verb`x` and \verb`y` for example.
+Implementing a grid would probably make it clearer, but separating it in two axes was easier for debugging and also for initial development.
+
+The contructor or initializer of the class simply takes all the system's information as input and stores it in the fields of a new object of the class.
+A good way to visualize it is that each time we initialize an object of this class a new problem system is created.
+
+The temporal evolution of the system is thus done by updating the data object (its \verb`u` and \verb`u_hat` fields, mainly) dynamically.
+The spectral classes provide an evolution method to evolve the data object in time through time steps.
+As such, time stepping methods are at the heart of the evolution method.
+The stepping method is also set as a field of the object, the \verb`step` field.
+It can be reassigned even mid-run.
+This is useful for using different stepping methods on different scales of time, since their performance varias between them.
+
+
+Now for the temporal stepping method implementation.
+It is our main 'evolution problem' solver.
+It operates on $\hat{\phi}$, the Fourier Transform of $\phi$.
+The complicated part, which cost us time,
+was the understanding of the numerical representation of the discretized wavelength domain,
+which is different for the FFT and DCT algorithms.
+Before we enter in further details on this discussion, remember:
+we are originally working in a spatial domain,
+but we use a Fourier Transform to take it to the wavelength domain.
+The \verb`freq` terms in the various Python FFT algorithms allude to frequencies, but our input data is not temporal.
+It is spatial.
+If you look into it, the help page on the fftfreq method,
+on both the scipy and numpy packages,
+provides no information on why it is arranged like it is (Positive values first, negatives later).
+As for the DCT's range of used frequencies, the scipy.fft.dctn help page is quite easy to understand.
+For the type-2 DCT on n-dimensional space the frequency domain is represented as an array of shape \verb`s`,
+a simple grid of equally spaced points starting from 0.
+The shape \verb`s` defaults to that of the original domain.
+We have the option to discretize the spectral domain differently.
+The negative values in the frequency grid for the FFT are left latter for a simple reason: they are seldom used.
+This is due to redundancy in the transformation of real-valued functions.
+The negatives represent complex conjugate terms
+$(e^{-2 \pi \lambda t})^* = e^{-2 \pi (-\lambda) t}$.
+Since our $\phi$, or \verb`u` field, is real-valued they are needless.
+So it actually makes sense to leave these values in the latter half.
+For most use cases, only the first half is essential.
 
 \section{Numerical analysis}
 
-1. Conservation of the total relative concentration $\Phi$ (Our order parameter)
+1. Conservation of the total relative concentration $\Phi$
+
+We define $\Phi$ as the integral of our order parameter over all the available space $\Omega$, that is,
+$$
+\Phi(t) = \int_{\Omega} \phi(\mathbf{x},t)dS
+$$
 
 Just like the total number of particles, $\Phi$ is conserved.
 To demonstrate so, we start by reminding ourselves that $\phi(\mathbf{x},t) = c_A(\mathbf{x},t)-c_B(\mathbf{x},t)$.
-Whence \[ \Phi(t) = \int_{\Omega} \phi(\mathbf{x},t)d\mathbf{x} = N_A - N_B, \]
-where $\Omega$ is the available space.
+Whence
+$$
+\Phi(t) = N_A - N_B
+$$
 
 $\Phi$ is thus conserved over time, since $N_A$ and $N_B$ also are.
-As a side-note: \[ N = N_A + N_B = \int_{\Omega} d\mathbf{x} = \mu(\Omega), \]
+As a side-note:
+$$
+N = N_A + N_B = \int_{\Omega} dS = \mu(\Omega),
+$$
 which is the measure of the area of $\Omega$, which has 0 error for a fixed-size grid.
 
 Since $2N_A = \Phi+1$, $\Phi$ is conserved if and only if $N_A$ and $N_B$ also are.
@@ -49,7 +132,7 @@ That is, it accounts for the decrease in the free energy due to the homogeneity 
 
 So $\epsilon$ could be visualized as being responsible for overall homogeneity.
 For higher $\epsilon$ values, to minimize the Helmholtz free energy, the system tends to make the gradient smaller overall, creating less but larger "islands of constancy" pure in each phase.
-This can also be seen as less "transition regions" or "total surface of variation" between the 2 main phases.
-So after long time steps we would expect spherical/circular boundaries between the 2 main phases to form (minimizing transition surface).
-Relatively high $\epsilon$ give rise to very weak phase separation, resulting in a homogenous, miscible, monophasic fluid.
+This can also be seen as less total "transition regions" or "surfaces of variation" between the 2 main phases.
+So after long time steps we would expect spherical/circular boundaries between the 2 main phases to form (minimizing the transition surface).
+Relatively high $\epsilon$ values give rise to very weak phase separation, resulting in a miscible, homogenous, monophasic fluid.
 \end{document}
