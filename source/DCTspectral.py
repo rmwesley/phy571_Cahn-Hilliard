@@ -58,6 +58,7 @@ class DCTspectral:
         We then go back to the space domain through an inverse FT to update self.u.
         """
         for i in range(reps):
+            self.u_hat = dctn(self.u, norm='ortho')
             self.u_hat = self.advance(dt, Nt)
             self.u = idctn(self.u_hat, norm='ortho')
             self.t += Nt*dt

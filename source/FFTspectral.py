@@ -57,6 +57,7 @@ class FFTspectral:
         We then go back to the space domain through an inverse FT to update self.u.
         """
         for i in range(reps):
+            self.u_hat = np.fft.fft2(self.u)
             self.u_hat = self.advance(dt, Nt)
             self.u = np.fft.ifft2(self.u_hat).real
             self.t += Nt*dt
