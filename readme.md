@@ -25,8 +25,12 @@ characterize the patterns obtained in phase separation.
 
 ## Compiling report.tex 
 
-To compile the LaTeX report in `document/` just run the command `pdflatex`&nbsp;`report.tex` from the `document/` directory.
-As for dependencies, installing the package `texlive-latex-extra` should be enough.
+To compile the LaTeX report in document/ just run the command pdflatex`&nbsp;report.tex` from the document/ directory after getting all correct dependencies.
+Specifically, you can install texlive-latex-extra from the texlive distribution to get the basic packages.
+Then, to get Polytechnique's styling and graphical packages you need to also install the polytechnique package of the group typographix.
+It isn't enough anymore for the newer versions of report.tex to compile it using just packages readily available on latex distributions like texlive.
+You need to be able to use Polytechnique's styling packages.
+Install them system-wide or decompress the package's files on the document/ folder.
 
 Remember, for the `pdflatex` command the order of the options matters.
 If you want to set an output directory, the `-output-directory` option should come *before* the name of the `.tex` file to be compiled.

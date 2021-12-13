@@ -6,4 +6,6 @@ temp*
 *.aux
 *.log
 *.toc
+*.out
+*.gif
 *.pdf
