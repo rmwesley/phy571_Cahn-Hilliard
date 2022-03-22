@@ -2,6 +2,7 @@ __pycache__/
 readme.pdf
 temp*
 .ipynb_checkpoints
+*.swp
 *.pyc
 *.aux
 *.log
@@ -9,3 +10,5 @@ temp*
 *.out
 *.gif
 *.pdf
+*.zip
+*.mp4

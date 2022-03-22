@@ -1,19 +1,53 @@
-\documentclass[a4paper]{article}
-\usepackage{amsmath}
-\usepackage{bigints}
+\documentclass[11pt,a4paper]{report}
+
+\usepackage[titlepage, sectionmark]{polytechnique}
+\usepackage[utf8]{inputenc}  
+\usepackage[T1]{fontenc} 
+\usepackage{mathtools, bm}
+\usepackage{amssymb, bm}
+\usepackage{hyperref}
+\usepackage[english]{babel}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{float}
+
+
+\usepackage{geometry}
+\geometry{hmargin=3cm, vmargin=3.5cm}
+
+
+\title[]{PHY571 PROJECT - PHASE SEPARATION OF THE COMPONENTS OF A BINARY FLUID
+}
+\subtitle{Project report}
+
+\author{ 
+\begin{tabular}{c}
+MACHADO Wesley, DAUMAS Gaspard, MAHJOUB Rayen
+\end{tabular} \\[\baselineskip] 
+}
+
+
+
+\date{10 December 2021}
+
+
 \begin{document}
 
-\title{Report on Numerical Physics' project
-
-\bf{Phase separation of a binary fluid}  
-}
 \maketitle
-\pagebreak
 
-\tableofcontents
-\pagebreak
 
-\section{The Cahn-Hilliard equation}
+\small{\tableofcontents}
+
+\newpage
+
+\chapter*{Introduction}
+
+A \textbf{binary liquid} is a type of chemical combination, which creates a special reaction or feature as a result of mixing two liquid chemicals, that are normally inert or have no function by themselves. A number of chemical products are produced as a result of mixing two chemicals as a binary liquid, such as plastic foams and some explosives. Binary fluid mixtures are examples of complex fluids whose microstructure and flow are strongly coupled. For pairs of simple fluids, the microstructure consists of droplets or bicontinuous demixed domains and the physics is controlled by the interfaces between these domains. At continuum level, the structure is defined by a composition field whose gradients – which are steep near interfaces – drive its diffusive current. These gradients also cause thermodynamic stresses which can drive fluid flow.
+
+The \textbf{Cahn-Hillard} equation is useful for retrieving the phase diagram of the fluid, but an explicit resolution of it is too complex. In this report, we will start by describing the problem theoretically. We will then describe a numerical method to tackle it and obtain an approximate solution, as well as the specifics of said method; we will also discuss the physics that surround the problem while incorporating them in our numerical analysis.
+
+\chapter{Theory}
+\section{Cahn-Hillard Equation}
 The Cahn-Hilliard equation is a non linear fourth order differential equation which is useful in solving problems such as the phase separation of a binary liquid mixture, tumor growth, the thermal induced phase separation etc. In our attempt to model the phase separation of the components of a binary fluid, the aim is to solve for a concentration variable $c(\mathbf{x}, t)$ that describes the spatial distribution of the two phases. A main advantage of solving the Cahn-Hilliard equation is that the border between the phases is continuous and does not have to be defined precisely.
 
 We will here give hints on how to derive the C-H equation from the laws of thermodynamics.
@@ -32,6 +66,7 @@ We finally have to find $P_{AB}$. To do so, an argument is that there are $N_az/
 In the end, the molar Helmholtz free energy reads: $\Delta F=\Omega c(1-c)+RT[(1-c)ln(1-c)+c  ln c]$
 This function can be plotted for different temperatures:
 \begin{figure}[h!]
+\centering
 \includegraphics[scale=0.7]{Capture}
 \caption{Molecular free energy as a function of c for different Temperatures}
 \end{figure}
@@ -43,48 +78,67 @@ The next step is to compute the total free energy of the volume of non-uniform c
 To conclude, we introduce the chemical potential $\mu=\frac{\delta e}{\delta c}$. The net flux of components B $I=-M\nabla \mu$ satisfies the continuity equation $\frac{\partial c}{\partial t}=-\nabla I$, and finally gives us the Cahn-Hilliard equation: $$\frac{\partial c}{\partial t}=\Delta(F'(c)-\epsilon^2\Delta c)$$\\
 
 
-As solving the CH equation explicitly is not possible, numerical simulations are essential to understand long term behaviours of the solutions of the equation. Several methods are possible to solve this equation, we will here focus on spectral methods. 
+\section{Treating the problem: Numerical methods and error}
 
-The first thing we will do is to discretize the time in time steps of $dt$. 
+Solving the CH equation explicitly is not possible; thus, we will resort to numerical simulations which are essential in understanding long-term behaviours of the solutions of the equation. There are several methods applicable for solving this problem, and they all rely on the first step of discretizing the time variable in steps of \textit{dt}; some are more naive than others, but they all eventually yield acceptable results, provided the discretization is narrow enough.
 
-We will now consider the C-H equation:$\frac{\partial \phi}{\partial t}=\Delta(F'(\phi)-\epsilon^2\Delta \phi)$, with $F(\phi)=0.25(\phi^2-1)^2$. Several schemes are possible to recursively solve for $\phi(kdt)$.\\
+We will now consider the C-H equation:$\frac{\partial \phi}{\partial t}=\Delta(F'(\phi)-\epsilon^2\Delta \phi)$, with $F(\phi)=0.25(\phi^2-1)^2$. Several schemes are possible to recursively solve for $\phi(kdt)=\phi^k$, and we will be especially interested in two of them.
 
-\textbf{Semi implicit Euler scheme}(Scheme 2)
+Some preliminary hypotheses are:
+\begin{itemize}
+    \item $\phi$ is obviously space-dependent as well, and we will be treating the problem in 2D.
+    \item The Fourier transform of $\phi$ will be noted $\tilde{\phi}$.
+    \item We will discretize space as well (and there will be a corresponding Fourier space discretization associated to it), but this will not bring further error to the calculations as we have transformed our problem into a simple equation resolution in Fourier space.
+\end{itemize}
+
+\subsection{Semi implicit Euler scheme}
 The fourth order term will be treated implicitly and the others explicitly. Taking the Fourier transform of the equation and applying this scheme gives: 
 
 $$(1+dt\epsilon^2|\textbf{k}|^4)\tilde{\phi}^{n+1}(\textbf{k})=\tilde{\phi}^n(\textbf{k})-dt\textbf{k}^2\tilde{F'(\phi^n)}(\textbf{k})$$
 
-\textbf{Linearly stabilized splitting scheme}(Scheme 5)
+Since $\frac{\phi^{n+1}-\phi^n}{dt} = \phi'(n.dt) + \frac{dt}{2}\phi''(n.dt) + O(dt^2)$ (the derivation is done with respect to time here), an error of $\frac{dt}{2}\phi''(n.dt)$ propagates from the n$^{th}$ term to the (n+1)$^{th}$ term. This means that, as long as the second derivative in time of $\phi$ is bounded, the error will not grow out of proportion. We can verify through experiments that, since a good approximation of $\phi''^n$ is $\frac{\phi^{n+1}+\phi^{n-1}-2\phi^n}{dt^2}$, $\phi''$ remains within an acceptable threshold.
+
+Of course, one could argue that there is an error on $\phi''$ depending on $\phi'''$, and in fact for a large enough value of dt the process does not converge, but the experiments show that $\phi'$ and $\phi''$'s value remain consistently low (for a low enough time of execution). This may be because we are looking at a continuous function in a compact set [0, $N_t$ dt] x [0,$N_x$ dx] x [0,$N_y$ dy].
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{d2tphi.png}
+\caption{Calculating $\sum_{space}\phi''(x,y)$ throughout the experiment}
+\end{figure}
+
+Finally, the \textbf{discretization error} is bounded by $\frac{\phi''_\infty}{2}$dt. There is also the advantage that this is a \textbf{semi-implicit scheme}, in the sense that we gain in the method's stability by not using a fully explicit scheme, as well as in simplicity by not using a fully implicit one.
+
+\subsection{Linearly stabilized splitting scheme}
 In this scheme the $-\phi$ in F' is split in $-3\phi$ that are treated explicitly and $2\phi$ that are treated implicitly. The rest doesn't differ from the semi implicit scheme. This gives:
 $$(1+dt(\epsilon^2|\textbf{k}|^4-2\textbf{k}^2))\tilde{\phi}^{n+1}(\textbf{k})=\tilde{\phi}^n(\textbf{k})+dt(\textbf{k}^2\tilde{{\phi^n}}(\textbf{k})^3-3\textbf{k}^2\tilde{\phi^n}(\textbf{k}))$$
 
 
 
+\chapter{Algorithm and Code Specifics}
 \section{Spectral solver}
 This section details the code {\bf implementation}.
 For its actual documentation use the \verb`help()` method in a Python interpreter. 
 \verb`help()` is designed to be used interactively and has a simple usage.
-In Jupyter pressing \verb`Shift+Tab` shows a popup with the head of the documentation.
+In Jupyter pressing \verb`Shift+Tab` shows a popup with the documentation.
 You can also directly read the docstrings and comments in the code itself.
 
-%TODO: Decide the best between these words lol
-%The design/layout/structure/template/organization of the code is simple.
-The design of the code is very simple.
+The code design is very simple.
 A class representing the problem is implemented (\verb`FFTspectral` or \verb`DCTspectral`),
 with attributes, or fields, storing the problem's information \verb`(Lx, Nx, epsilon)`.
 None of the attributes are left constant, so everything can be played with mid-run.
 This obviously may cause bugs, but the freedom of intervention was preferred in our implementation.
-One obvious field that is meant to be updated on-the-fly,
-not left static as initial conditions,
-is the one representing our desired order parameter $\phi$,
+Basically only two fields are really meant to be updated on-the-fly,
+not left static as an initial condition,
+the ones representing our desired order parameter $\phi(\textbf{x}, t)$,
+and its spectral decomposition $\hat{\phi(\textbf{k}, t)}$
 a function of space,
 which we aim to determine over time.
 It is stored in the field \verb`u` of the object.
 The \verb`t` field is used to store and keep track of the elapsed time since the object's initialization.
 In the end we can see the data on
-$\phi(\mathcal{x}, t)$
+$\phi(\textbf{x}, t)$
 and
-$\hat{\phi(\mathcal{k}, t)}$
+$\hat{\phi(\textbf{k}, t)}$
 as a snapshot on a given instant in time containing only their spatial/spectral dependency.
 The data object can be evolved in time with methods detailed further on in this section.
 
@@ -133,27 +187,35 @@ Since our $\phi$, or \verb`u` field, is real-valued they are needless.
 So it actually makes sense to leave these values in the latter half.
 For most use cases, only the first half is essential.
 
+Here are some results we've obtained:
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{phi.png}
+\caption{Binary fluid phase diagram after 14200 iterations (dt=$100$).}
+\begin{subfigure}
+\includegraphics[scale=0.4]{phi22.png}
+\includegraphics[scale=0.4]{phi2.png}
+\caption{Same experiment with a shorter elapsed time (dt = $10^{-5}$). Left: 157 steps, right: 544 steps.}
+\end{subfigure}
+\end{figure}
+
 \section{Numerical analysis}
 
 1. Conservation of the total relative concentration $\Phi$
 
 We define $\Phi$ as the integral of our order parameter over all the available space $\Omega$, that is,
-$$
-\Phi(t) = \int_{\Omega} \phi(\mathbf{x},t)dS
-$$
+$$ \Phi(t) = \int_{\Omega} \phi(\textbf{x},t)dS $$
 
 Just like the total number of particles, $\Phi$ is conserved.
-To demonstrate so, we start by reminding ourselves that $\phi(\mathbf{x},t) = c_A(\mathbf{x},t)-c_B(\mathbf{x},t)$.
+To demonstrate so, we start by reminding ourselves that
+$\phi(\textbf{x},t) = c_A(\textbf{x},t)-c_B(\textbf{x},t)$.
 Whence
-$$
-\Phi(t) = N_A - N_B
-$$
+$$ \Phi(t) = N_A - N_B $$
 
 $\Phi$ is thus conserved over time, since $N_A$ and $N_B$ also are.
 As a side-note:
-$$
-N = N_A + N_B = \int_{\Omega} dS = \mu(\Omega),
-$$
+$$ N = N_A + N_B = \int_{\Omega} dS = \mu(\Omega), $$
 which is the measure of the area of $\Omega$, which has 0 error for a fixed-size grid.
 
 Since $2N_A = \Phi+1$, $\Phi$ is conserved if and only if $N_A$ and $N_B$ also are.
@@ -161,24 +223,52 @@ Since $2N_A = \Phi+1$, $\Phi$ is conserved if and only if $N_A$ and $N_B$ also a
 Finally, we define as an error metric the change in this quantity.
 Numerically, we just calculate the sum of the relative concentration over the whole spatial grid.
 We define
-\[ \mathcal{E}(t) = |\Phi(t) - \Phi_0| \]
+$$ \mathcal{E}(t) = |\Phi(t) - \Phi_0| $$
 We take the logarithm since the scales are very small and note that for our tests $log_{2}\mathcal{E}(t) \approx -58$.
 Which is on the order of the precision of the \verb`float64` type we used ($2^{-53}$).
 
 
 
 \section{Understanding the free energy density}
-About the function $f(\phi) = F(\phi) + \frac{\epsilon^2}{2}|\nabla{\phi}|^2$ (density of free energy):
+Here we make a short discussion about the function
+$f(\phi) = F(\phi) + \frac{\epsilon^2}{2}|\nabla{\phi}|^2$
+(density of free energy)
 
-The second term on $\phi$ describes the "gradient energy", or how the local variability in the concentration increases the free energy.
+The second term on $f(\phi)$ describes the "gradient energy", or how the local variability in $\phi$ increases the free energy.
 So as to decrease the free energy, the system normally increases the entropy through mixing, this is accounted for in the first term $F(\phi)$.
 But the second term is responsible for local regularity - locally, it favors regions of less variant concentration.
 That is, it accounts for the decrease in the free energy due to the homogeneity in the system's composition, modelling spinodal decomposition in a simple way.
-(Higher homogeneity = Smaller local variation in composition = Smaller magnitude of concentration gradient = lower free energy).
+Higher homogeneity implies smaller local variation in composition.
+Which implies smaller magnitude of concentration gradient.
+Which implies lower $\frac{\epsilon^2}{2}|\nabla{\phi}|^2$.
+Which implies lower free energy.
 
 So $\epsilon$ could be visualized as being responsible for overall homogeneity.
 For higher $\epsilon$ values, to minimize the Helmholtz free energy, the system tends to make the gradient smaller overall, creating less but larger "islands of constancy" pure in each phase.
 This can also be seen as less total "transition regions" or "surfaces of variation" between the 2 main phases.
 So after long time steps we would expect spherical/circular boundaries between the 2 main phases to form (minimizing the transition surface).
 Relatively high $\epsilon$ values give rise to very weak phase separation, resulting in a miscible, homogenous, monophasic fluid.
+This was observed numerically as $\phi$ converging to its average value in all points of space,
+thus becoming constant over $(\Omega, T)$.
+
+\chapter{Conclusion}
+
+In this report we have presented some numerical methods to solve the Cahn-Hillard equation and the phase separation problem in a binary fluid. We have been able to derive some results for different time discretizations and different initial spreads of the fluid components' relative concentrations, namely the fact that if the fluid's composition is fairly imbalanced towards one of its parts, we obtain a phase diagram that looks like bubbles of said part dispersed among the rest of it.
+Our main conclusion is the "homogenizing" effect of the added term on the free energy density function.
+Normally, when $\epsilon=0$, we would expect a random distribution of concentrations -1 and 1, pure black and pure white, which would maximize entropy and thus minimize our objective, the free energy.
+In our case we clearly observed we still had these almost pure black and white regions, but with a miscibility effect in their boundaries,
+which is a direct consequence of a tendency for the minimization of the fluid's spatial variability in constitution, $|\nabla{\phi(\textbf{x}, t)}|^2$.
+
+
+
+\begin{figure}[h!]
+\centering
+\includegraphics{phi3.png}
+\caption{Binary fluid phase diagram for 21\% of the black part initially present.}
+\end{figure}
+
+
+
+
+
 \end{document}

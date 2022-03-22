@@ -1,0 +1,4 @@
+Report dependencies:
+    Upload all the media files that were used to compile the report.
+    Add typographix dependency files as well;
+    Or remove \usepackage{polytechnique} from report.tex altogether.

@@ -21,11 +21,10 @@ you may write naively.
 > TCGPhysica1995.pdf will possibly give you some ideas of diagnostics
 that you can implement, once your solver will be running, to
 characterize the patterns obtained in phase separation.
-\
 
 ## Compiling report.tex 
 
-To compile the LaTeX report in document/ just run the command pdflatex`&nbsp;report.tex` from the document/ directory after getting all correct dependencies.
+To compile the LaTeX report in document/ just run the command `pdflatex report.tex` from the document/ directory after getting all correct dependencies.
 Specifically, you can install texlive-latex-extra from the texlive distribution to get the basic packages.
 Then, to get Polytechnique's styling and graphical packages you need to also install the polytechnique package of the group typographix.
 It isn't enough anymore for the newer versions of report.tex to compile it using just packages readily available on latex distributions like texlive.
@@ -38,8 +37,13 @@ This way you can compile the report directly from the root directory of the proj
 
 `pdflatex -output-directory document document/report.tex`
 
-`-halt-on-error` is also a good option to avoid unnecessary error prompts. 
-\
-\
+`-halt-on-error` is also a good option to avoid unnecessary error prompts.
 
-**Project done in collaboration by students Rayen Mahjoub, Gaspard Daumas and Wesley Rodrigues Machado. Supervised by professor Arnaud Couairon.**
+## Example animation:
+
+https://user-images.githubusercontent.com/64560431/159530799-3d379950-dbc6-48ae-a0bc-7ca31ae3f2c5.mp4
+
+<br>
+
+### Project done in collaboration by students Rayen Mahjoub, Gaspard Daumas and Wesley Rodrigues Machado. Supervised by professor Arnaud Couairon.
+
